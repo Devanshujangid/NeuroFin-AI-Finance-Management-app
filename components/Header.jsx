@@ -8,6 +8,8 @@ import {
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { BrainCircuit, LogIn } from "lucide-react";
+import { LayoutGrid, PenSquare } from "lucide-react";
+
 
 const Header = () => {
   return (
@@ -28,6 +30,7 @@ const Header = () => {
           </span>
         </div>
       </Link>
+
 
       {/* Right: Auth / User */}
       <div className="flex items-center gap-3">
@@ -58,8 +61,43 @@ const Header = () => {
         </SignedOut>
 
         <SignedIn>
-          <UserButton />
+         <div className="flex items-center gap-2">
+    
+           {/* Dashboard button */}
+           <Link href="/dashboard">
+           <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+             <LayoutGrid className="h-4 w-4" />
+             <span className="hidden sm:inline">Dashboard</span>
+          </Button>
+           </Link>
+
+    {/* Add Transaction button */}
+          <Link href="/transactions/new">
+          <Button
+            size="sm"
+           className="flex items-center gap-2"
+          >
+          <PenSquare className="h-4 w-4" />
+          <span className="hidden sm:inline">Add Transaction</span>
+         </Button>
+         </Link>
+
+      {/* User menu */}
+      {/* to increase this user button size I will use the clerk property of avatar box...I will use appearance property of clerk */}
+      <UserButton 
+        appearance={ {
+           elements: {
+            avatarBox: "h-15 w-15",
+           }
+         }
+        }/>      
+      </div>
         </SignedIn>
+
       </div>
     </header>
   );
