@@ -1,11 +1,10 @@
-import React from 'react'
 import Link from "next/link";
 import { Button } from "../ui/button";
 
 const HeroSection = () => {
   return (
     <div>
-      <section className="pt-40 pb-32">
+      <section className="pt-36 pb-24">
       <div className="max-w-7xl mx-auto px-6 text-center">
         {/* Heading */}
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight">
@@ -35,7 +34,6 @@ const HeroSection = () => {
 
           <Link href="/dashboard">
             <Button
-              variant="outline"
               size="lg"
               className="flex items-center gap-2"
             >
