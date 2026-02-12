@@ -2,8 +2,8 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "./supabase-server";
 
 export async function ensureUserExists() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthenticated");
+  const { userId } = await auth();   //ask clerk who is logged in-> returns authenticated user ID 
+  if (!userId) throw new Error("Unauthenticated");    // if no user-> returns unauthenticated
 
   const clerkUser = await currentUser();
   if (!clerkUser) throw new Error("Clerk user missing");
@@ -15,7 +15,7 @@ export async function ensureUserExists() {
     .from("users")
     .select("*")
     .eq("clerk_user_id", userId)
-    .single();
+    .single(); // return row
 
   let user = existingUser;
 
