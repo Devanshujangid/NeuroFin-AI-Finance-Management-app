@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function CreateAccountDrawer() {
   const [open, setOpen] = useState(false);
@@ -22,7 +23,7 @@ export default function CreateAccountDrawer() {
   const [isDefault, setIsDefault] = useState(false);
 
   const [loading, setLoading] = useState(false);
-
+  const router = useRouter();
   // error state
   const [errors, setErrors] = useState<{
     name?: string;
@@ -66,10 +67,10 @@ export default function CreateAccountDrawer() {
         
       });
       toast.success("Account created successfully", {
-  description: "Your new account is ready to use",
+      description: "Your new account is ready to use",
 });
 
-
+      router.refresh();
       // reset form
       setName("");
       setType("");
