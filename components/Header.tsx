@@ -1,3 +1,7 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 import {
   SignInButton,
   SignUpButton,
@@ -12,6 +16,17 @@ import { LayoutGrid, PenSquare } from "lucide-react";
 
 
 const Header = () => {
+  const pathname = usePathname();
+  const isAccountPage = pathname.startsWith("/account/");
+
+const accountId = isAccountPage
+  ? pathname.split("/account/")[1]
+  : null;
+
+const transactionHref = accountId
+  ? `/transaction/create?accountId=${accountId}`
+  : "/transaction/create";
+
   return (
     <header className="flex items-center justify-between px-3 sm:px-6 h-16 border-b">
       
@@ -76,7 +91,7 @@ const Header = () => {
            </Link>
 
     {/* Add Transaction button */}
-          <Link href="/transactions/new">
+          <Link href={transactionHref}>
           <Button
             size="sm"
            className="flex items-center gap-2"
@@ -104,3 +119,5 @@ const Header = () => {
 };
 
 export default Header;
+
+
