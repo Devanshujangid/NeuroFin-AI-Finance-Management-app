@@ -1,3 +1,5 @@
+"use server";
+
 import { supabaseAdmin } from "./supabase-server";
 
 export async function getTransactionsByAccount(accountId: string) {
@@ -42,4 +44,22 @@ export async function getTransactionStats(accountId: string) {
     totalExpense,
     netBalance: totalIncome - totalExpense,
   };
+}
+
+export async function getTransactionById(
+  transactionId: string
+) {
+  const { data, error } =
+    await supabaseAdmin
+      .from("transactions")
+      .select("*")
+      .eq("id", transactionId)
+      .single();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return data;
 }

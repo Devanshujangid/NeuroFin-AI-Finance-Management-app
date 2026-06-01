@@ -17,8 +17,10 @@ export default async function DashboardPage() {
   if (accounts.length === 0) {
     return (
       <div className="p-6 space-y-6">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-black bg-clip-text text-transparent">
-          Dashboard
+        <h1 className="text-4xl font-bold tracking-tight">
+          <span className="bg-linear-to-r from-blue-800 to-blue-600 bg-clip-text text-transparent">
+            Dashboard
+          </span>
         </h1>
 
         <h2 className="text-lg font-semibold text-black">
@@ -35,8 +37,10 @@ export default async function DashboardPage() {
 
       {/* Header Section */}
       <div>
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-black bg-clip-text text-transparent">
-          Dashboard
+        <h1 className="text-4xl font-bold tracking-tight">
+          <span className="bg-linear-to-r from-blue-800 to-blue-600 bg-clip-text text-transparent">
+            Dashboard
+          </span>
         </h1>
         <h2 className="text-lg font-semibold text-black mt-2">
           Your Accounts

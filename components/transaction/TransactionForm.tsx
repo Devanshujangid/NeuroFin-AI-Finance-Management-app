@@ -4,20 +4,56 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect , useState } from "react";
+import { createTransaction } from "@/lib/actions/create-transaction";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { getTransactionById } from "@/lib/transactions";
+import { updateTransaction } from "@/lib/actions/update-transaction";
 
 export default function TransactionForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const accountId = searchParams.get("accountId");
+  const editId = searchParams.get("edit");
+  const isEditMode = Boolean(editId);
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [currentAccountId, setCurrentAccountId] =
+  useState(accountId || "");
+
+  useEffect(() => {
+  async function fetchTransaction() {
+
+    if (!editId) return;
+
+    const transaction =
+      await getTransactionById(editId);
+
+    if (!transaction) return;
+    setCurrentAccountId(transaction.account_id);
+
+    setAmount(String(transaction.amount));
+    setType(transaction.type);
+    setCategory(transaction.category);
+    setDescription(transaction.description || "");
+    setIsRecurring(transaction.is_recurring);
+  }
+
+  fetchTransaction();
+}, [editId]);
+
+
+  
 
   // for form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    
   e.preventDefault();
 
   setError("");
@@ -26,14 +62,47 @@ export default function TransactionForm() {
   return;
 }
 
-  console.log({
-    accountId,
-    amount,
-    type,
-    category,
-    description,
-    isRecurring,
-  });
+if (!isEditMode && !accountId) {
+  setError("No account selected");
+  return;
+}
+setLoading(true);
+
+try {
+  let response;
+
+  if (isEditMode && editId) {
+    response = await updateTransaction({
+      transactionId: editId,
+      amount: Number(amount),
+      type: type as "INCOME" | "EXPENSE",
+      category,
+      description,
+      isRecurring,
+    });
+  } else {
+    response = await createTransaction({
+      accountId: accountId!,
+      amount: Number(amount),
+      type: type as "INCOME" | "EXPENSE",
+      category,
+      description,
+      isRecurring,
+    });
+  }
+
+  console.log(response);
+  toast.success(isEditMode ? "Transaction updated successfully" : "Transaction created successfully");
+  router.push(`/account/${currentAccountId}`);
+
+} catch (err) {
+  console.log(err);
+  toast.error(isEditMode ? "Failed to update transaction" : "Failed to create transaction");
+
+} finally {
+  setLoading(false);
+}
+
 };
 
 
@@ -46,9 +115,13 @@ export default function TransactionForm() {
 
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">
-          Create Transaction
-        </h1>
+        <h1 className="text-4xl font-bold tracking-tight">
+  <span className="bg-linear-to-r from-blue-800 to-blue-600 bg-clip-text text-transparent">
+    {isEditMode
+      ? "Edit Transaction"
+      : "Create Transaction"}
+  </span>
+</h1>
 
         <p className="text-sm text-gray-500 mt-1">
           Add a new income or expense transaction
@@ -138,9 +211,20 @@ export default function TransactionForm() {
 )}
 
       {/* Submit */}
-      <Button className="w-full">
-        Create Transaction
-      </Button>
+<Button
+  type="submit"
+  className="w-full"
+  disabled={loading}
+>
+  {loading
+    ? isEditMode
+      ? "Updating Transaction..."
+      : "Creating Transaction..."
+    : isEditMode
+      ? "Update Transaction"
+      : "Create Transaction"}
+</Button>
+
     </form>
   );
 }

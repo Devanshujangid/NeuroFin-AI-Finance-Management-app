@@ -42,24 +42,32 @@ export default async function AccountPage({
     <div className="p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">{account.name}</h1>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          <span className="bg-linear-to-r from-blue-800 to-blue-600 bg-clip-text text-transparent">
+            {account.name}
+          </span>
+        </h1>
         <p className="text-sm text-gray-500 capitalize">{account.type}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="border rounded-xl p-4 bg-white">
+        <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm hover:shadow-md transition-all">
           <p className="text-sm text-gray-500">Current Balance</p>
           <p className="text-2xl font-bold">₹{formattedBalance}</p>
         </div>
 
-        <div className="border rounded-xl p-4 bg-white">
+        <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm hover:shadow-md transition-all">
           <p className="text-sm text-gray-500">Total Transactions</p>
-          <p className="text-2xl font-bold">0</p>
+          <p className="text-2xl font-bold">
+  {transactions.length}
+</p>
         </div>
       </div>
 
-      <TransactionTable transactions={transactions} />
+      <div className="rounded-2xl border bg-white shadow-sm overflow-hidden">
+        <TransactionTable transactions={transactions} />
+      </div>
 
       {/* Graph Placeholder */}
       <div className="border rounded-xl p-6 bg-white">
