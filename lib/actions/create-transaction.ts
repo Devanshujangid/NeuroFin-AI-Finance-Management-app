@@ -13,9 +13,8 @@ export async function createTransaction(data: {
   type: "INCOME" | "EXPENSE";
   category: string;
   description?: string;
+  date: string;
   isRecurring: boolean;
-
-  
 }) {
     const { userId } = await auth();
 
@@ -45,6 +44,7 @@ const { error: transactionError } = await supabaseAdmin
     type: data.type,
     category: data.category,
     description: data.description,
+    date: data.date,
     is_recurring: data.isRecurring,
   });
 

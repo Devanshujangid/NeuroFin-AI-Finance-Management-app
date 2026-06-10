@@ -5,6 +5,9 @@ import {
   getTransactionStats,
 } from "@/lib/transactions";
 import TransactionTable from "@/components/dashboard/TransactionTable";
+import AnalyticsSection from "@/components/dashboard/AnalyticsSection";
+import { getBudget } from "@/lib/actions/get-budget";
+import BudgetCard from "@/components/dashboard/BudgetCard";
 
 export default async function AccountPage({
   params,
@@ -26,6 +29,8 @@ export default async function AccountPage({
   const transactions = await getTransactionsByAccount(id);
 
   const stats = await getTransactionStats(id);
+  const budget = await getBudget(id); 
+  console.log("Budget:", budget); 
 
   //Safe comparison
   const account = accounts.find((acc) => String(acc.id) === String(id));
@@ -33,10 +38,6 @@ export default async function AccountPage({
   if (!account) {
     return <div>Account not found</div>;
   }
-
-  const formattedBalance = new Intl.NumberFormat("en-IN").format(
-    account.balance,
-  );
 
   return (
     <div className="p-6 space-y-6">
@@ -50,34 +51,21 @@ export default async function AccountPage({
         <p className="text-sm text-gray-500 capitalize">{account.type}</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm hover:shadow-md transition-all">
-          <p className="text-sm text-gray-500">Current Balance</p>
-          <p className="text-2xl font-bold">₹{formattedBalance}</p>
-        </div>
+      <BudgetCard
+  accountId={id}
+  budget={budget}
+/>
 
-        <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm hover:shadow-md transition-all">
-          <p className="text-sm text-gray-500">Total Transactions</p>
-          <p className="text-2xl font-bold">
-  {transactions.length}
-</p>
-        </div>
-      </div>
-
+      <AnalyticsSection
+        transactions={transactions}
+        currentBalance={account.balance}
+        stats={stats}
+      />
+      
       <div className="rounded-2xl border bg-white shadow-sm overflow-hidden">
         <TransactionTable transactions={transactions} />
       </div>
 
-      {/* Graph Placeholder */}
-      <div className="border rounded-xl p-6 bg-white">
-        <p className="text-gray-500">Transaction Graph (Coming Soon)</p>
-      </div>
-
-      {/* Table Placeholder */}
-      <div className="border rounded-xl p-6 bg-white">
-        <p className="text-gray-500">Transactions Table (Coming Soon)</p>
-      </div>
     </div>
   );
 }

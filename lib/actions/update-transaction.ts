@@ -9,6 +9,7 @@ export async function updateTransaction(data: {
   type: "INCOME" | "EXPENSE";
   category: string;
   description?: string;
+  date: string;
   isRecurring: boolean;
 }) {
 
@@ -76,6 +77,7 @@ const { error: updateError } =
       type: data.type,
       category: data.category,
       description: data.description,
+      date: data.date,
       is_recurring: data.isRecurring,
     })
     .eq("id", data.transactionId);

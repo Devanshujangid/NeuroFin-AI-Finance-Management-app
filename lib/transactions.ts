@@ -21,7 +21,7 @@ export async function getTransactionsByAccount(accountId: string) {
 }
 
 export async function getTransactionStats(accountId: string) {
-  // calculate total income, expenses and net balance.
+  // calculate total income, expenses and net balance and total transactions.
   // this become reusable for charts,anaytics,dashboards and AI
   const transactions = await getTransactionsByAccount(accountId);
 

@@ -21,6 +21,9 @@ export default function TransactionForm() {
   const [type, setType] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [date, setDate] = useState(
+  new Date().toISOString().split("T")[0]
+  );
   const [isRecurring, setIsRecurring] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,10 +46,15 @@ export default function TransactionForm() {
     setCategory(transaction.category);
     setDescription(transaction.description || "");
     setIsRecurring(transaction.is_recurring);
+    //console.log(transaction.date);
+  setDate(
+  transaction.date.split("T")[0]
+);
   }
 
   fetchTransaction();
 }, [editId]);
+
 
 
   
@@ -78,6 +86,7 @@ try {
       type: type as "INCOME" | "EXPENSE",
       category,
       description,
+      date,
       isRecurring,
     });
   } else {
@@ -87,6 +96,7 @@ try {
       type: type as "INCOME" | "EXPENSE",
       category,
       description,
+      date,
       isRecurring,
     });
   }
@@ -141,6 +151,22 @@ try {
           onChange={(e) => setAmount(e.target.value)}
         />
       </div>
+
+      {/* Date */}
+<div className="space-y-2">
+  <label className="text-sm font-medium">
+    Transaction Date
+  </label>
+
+  <Input
+    type="date"
+    value={date}
+    onChange={(e) =>
+      setDate(e.target.value)
+    }
+  />
+</div>
+
 
       {/* Type */}
       <div className="space-y-2">

@@ -69,27 +69,6 @@ export async function ensureUserExists() {
     if (error) throw error;
   }
 
-  // ---------------------------
-  // 3. Ensure budget
-  // ---------------------------
-  const { data: budget, error: budgetError } = await supabaseAdmin
-    .from("budgets")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-
-  if (budgetError && budgetError.code !== "PGRST116") {
-    throw new Error(budgetError.message);
-  }
-
-  if (!budget) {
-    const { error } = await supabaseAdmin.from("budgets").insert({
-      user_id: user.id,
-      amount: 0,
-    });
-
-    if (error) throw error;
-  }
 
   return user;
 }
