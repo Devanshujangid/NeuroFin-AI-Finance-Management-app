@@ -30,6 +30,32 @@ export default async function AccountPage({
 
   const stats = await getTransactionStats(id);
   const budget = await getBudget(id); 
+  const currentMonthExpense = transactions
+  .filter((transaction) => {
+    const transactionDate =
+      new Date(transaction.date);
+
+    const now = new Date();
+
+    return (
+      transaction.type === "EXPENSE" &&
+      transactionDate.getMonth() ===
+        now.getMonth() &&
+      transactionDate.getFullYear() ===
+        now.getFullYear()
+    );
+  })
+  .reduce(
+    (total, transaction) =>
+      total + Number(transaction.amount),
+    0
+  );
+
+  console.log(
+  "Current Month Expense:",
+  currentMonthExpense
+);
+
   console.log("Budget:", budget); 
 
   //Safe comparison
@@ -54,6 +80,7 @@ export default async function AccountPage({
       <BudgetCard
   accountId={id}
   budget={budget}
+  currentMonthExpense={currentMonthExpense}
 />
 
       <AnalyticsSection

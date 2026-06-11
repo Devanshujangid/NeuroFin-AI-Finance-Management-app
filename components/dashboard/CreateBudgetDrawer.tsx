@@ -11,6 +11,9 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { createBudget } from "@/lib/actions/create-budget";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type CreateBudgetDrawerProps = {
   accountId: string;
@@ -21,6 +24,43 @@ export default function CreateBudgetDrawer({
 }: CreateBudgetDrawerProps) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleSubmit() {
+  if (loading) return;
+
+  try {
+    setLoading(true);
+
+    if (!amount || isNaN(Number(amount))) {
+      toast.error("Please enter a valid budget amount");
+      return;
+    }
+
+    await createBudget({
+      accountId,
+      amount: Number(amount),
+    });
+
+    toast.success("Budget created successfully", {
+      description: "Monthly budget has been configured",
+    });
+
+    router.refresh();
+
+    setAmount("");
+    setOpen(false);
+
+  } catch (error: any) {
+    toast.error("Error", {
+      description:
+        error.message || "Failed to create budget",
+    });
+  } finally {
+    setLoading(false);
+  }
+}
 
   return (
     <>
@@ -66,16 +106,12 @@ export default function CreateBudgetDrawer({
               </Button>
 
               <Button
-                className="bg-black text-white hover:bg-gray-800"
-                onClick={() => {
-                  console.log({
-                    accountId,
-                    amount,
-                  });
-                }}
-              >
-                Create Budget
-              </Button>
+  className="bg-black text-white hover:bg-gray-800"
+  onClick={handleSubmit}
+  disabled={loading}
+>
+  {loading ? "Creating..." : "Create Budget"}
+</Button>
             </div>
           </div>
         </DrawerContent>
