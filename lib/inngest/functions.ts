@@ -1,5 +1,7 @@
 import { inngest } from "./client";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { gemini } from "@/lib/ai/gemini";
+import {generateRecommendation,} from "@/lib/ai/generate-recommendation";
 
 export const budgetAlertFunction =
   inngest.createFunction(
@@ -35,6 +37,16 @@ export const budgetAlertCron =
       ],
     },
     async () => {
+      console.log(
+        "Gemini Key Exists:",
+        !!process.env.GEMINI_API_KEY
+      );
+
+      console.log(
+  "Gemini Client Created:",
+  !!gemini
+);
+
       console.log(
         "Budget Alert Cron Triggered"
       );
@@ -374,6 +386,19 @@ const analytics = {
 
   riskLevel,
 };
+
+const result =
+  await generateRecommendation(
+    analytics
+  );
+
+console.log(
+  "AI Recommendation:"
+);
+
+console.log(
+  result.recommendation
+);
 
 console.log(
   "Analytics:",
