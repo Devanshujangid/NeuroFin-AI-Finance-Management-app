@@ -1,7 +1,9 @@
 import { inngest } from "./client";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { gemini } from "@/lib/ai/gemini";
-import {generateRecommendation,} from "@/lib/ai/generate-recommendation";
+import { generateRecommendation } from "@/lib/ai/generate-recommendation";
+import BudgetAlertEmail from "@/emails/BudgetAlertEmails";
+import { sendEmail } from "@/lib/actions/send-email";
 
 export const budgetAlertFunction =
   inngest.createFunction(
@@ -81,17 +83,49 @@ export const budgetAlertCron =
         budgets?.length || 0
       );
 
-      const firstBudget =
-        budgets?.[0] as any; 
-
-        const budgetAmount =
-  Number(firstBudget?.amount || 0);
-
-console.log(
-  "Budget Amount:",
-  budgetAmount
+      console.log(
+  "All Budgets:",
+  budgets
 );
 
+      for (const budget of (budgets || []) as any[]) {
+        console.log(
+          "Processing Budget:",
+          budget.id
+        );
+
+        console.log(
+          "Account Name:",
+          budget.accounts.name
+        );
+
+        console.log(
+          "Budget Amount:",
+          budget.amount
+        );
+
+        const lastAlertLevel =
+          budget.last_alert_level;
+
+        const budgetAmount =
+          Number(budget.amount || 0);
+
+        const accountId =
+          budget.accounts.id;
+
+
+        console.log(
+          "Last Alert Level:",
+          lastAlertLevel
+        );
+
+        console.log(
+          "Account ID:",
+          accountId
+        );
+
+
+              
       const today = new Date();
 
       const monthStart = new Date(
@@ -117,9 +151,7 @@ console.log(
 const previousMonthEnd =
   monthStart;
 
-      const accountId =
-        firstBudget?.accounts?.id;
-
+      
       const {
         data: transactions,
         error: transactionError,
@@ -365,6 +397,187 @@ console.log(
   riskLevel
 ); 
 
+const ALERT_80 = 80;
+const ALERT_90 = 90;
+const ALERT_100 = 100;
+let currentAlertLevel = 0;
+
+console.log(
+  "Alert Thresholds:",
+  {
+    ALERT_80,
+    ALERT_90,
+    ALERT_100,
+  }
+);
+
+if (usagePercentage >= ALERT_100) {
+  currentAlertLevel = 100;
+} else if (
+  usagePercentage >= ALERT_90
+) {
+  currentAlertLevel = ALERT_90;
+} else if (
+  usagePercentage >= ALERT_80
+) {
+  currentAlertLevel = ALERT_80;
+}
+
+console.log(
+  "Current Alert Level:",
+  currentAlertLevel
+);
+
+let shouldSendEmail =
+  false;
+
+let alertLevel:
+  number | null = null;
+let isDuplicateAlert =
+  false;
+
+if (
+  currentAlertLevel ===
+  ALERT_80
+) {
+  shouldSendEmail = true;
+
+  alertLevel =
+    ALERT_80;
+}
+
+if (
+  currentAlertLevel ===
+  ALERT_90
+) {
+  shouldSendEmail = true;
+
+  alertLevel =
+    ALERT_90;
+}
+
+if (
+  currentAlertLevel ===
+  ALERT_100
+) {
+  shouldSendEmail = true;
+
+  alertLevel =
+    ALERT_100;
+}
+
+console.log(
+  "Should Send Email:",
+  shouldSendEmail
+);
+
+console.log(
+  "Alert Level:",
+  alertLevel
+);
+
+if (
+  lastAlertLevel !== null &&
+  currentAlertLevel ===
+    lastAlertLevel
+) {
+  isDuplicateAlert = true;
+}
+
+if (isDuplicateAlert) {
+  shouldSendEmail = false;
+}
+
+
+
+console.log(
+  "Is Duplicate Alert:",
+  isDuplicateAlert
+);
+
+console.log(
+  "Final Email Decision:",
+  shouldSendEmail
+);
+
+const decisionEngineOutput = {
+  shouldSendEmail,
+
+  alertLevel,
+
+  budgetData: {
+    budgetId:
+      budget.id,
+
+    budgetAmount,
+
+    spentAmount:
+      totalExpenses,
+
+    remainingAmount,
+
+    percentageUsed:
+      usagePercentage,
+
+    riskLevel,
+  },
+};
+
+console.log(
+  "Decision Engine Output:",
+  decisionEngineOutput,
+);
+
+
+const updatePayload = {
+  last_alert_level:
+    alertLevel,
+
+  last_alert_sent_at:
+    new Date().toISOString(),
+};
+
+console.log(
+  "Update Payload:",
+  updatePayload
+);
+
+console.log(
+  "Timestamp To Store:",
+  updatePayload
+    .last_alert_sent_at
+);
+
+if (
+  shouldSendEmail &&
+  alertLevel !== null
+) {
+  const {
+    error: updateError,
+  } = await supabaseAdmin
+    .from("budgets")
+    .update({
+      last_alert_level:
+        alertLevel,
+      last_alert_sent_at:
+        new Date().toISOString(),
+    })
+    .eq(
+      "id",
+      budget.id
+    );
+
+  if (updateError) {
+    throw new Error(
+      updateError.message
+    );
+  }
+
+  console.log(
+    "Budget Alert Level Updated"
+  );
+}
+
 const analytics = {
   budgetAmount,
 
@@ -392,6 +605,99 @@ const result =
     analytics
   );
 
+const emailPayload = {
+  userName:
+    "Devanshu",
+
+  accountName:
+    budget.accounts.name,
+
+  budgetAmount,
+
+  spentAmount:
+    totalExpenses,
+
+  remainingAmount,
+
+  percentageUsed:
+    usagePercentage,
+
+  topCategory,
+
+  topCategorySpend,
+
+  monthlyChange,
+
+  projectedMonthEndSpend,
+
+  riskLevel,
+
+  aiRecommendation:
+    result.recommendation.recommendation,
+};
+
+console.log(
+  "Email Payload:"
+);
+
+console.log(
+  emailPayload
+);
+
+const emailTemplate =
+  BudgetAlertEmail(
+    emailPayload
+  );
+
+console.log(
+  "Email Template Created:",
+  !!emailTemplate
+);
+
+console.log(
+  "Preparing Email Send..."
+);
+
+const emailRequest = {
+  to:
+    budget.accounts
+      .users.email,
+
+  subject:
+    `NeuroFin Budget Alert - ${budget.accounts.name}`,
+
+  react:
+    emailTemplate,
+};
+
+console.log(
+  "Email Request:"
+);
+
+console.log(
+  emailRequest
+);
+
+if (shouldSendEmail) {
+  const emailResult =
+    await sendEmail(
+      emailRequest
+    );
+
+  console.log(
+    "Email Result:"
+  );
+
+  console.log(
+    emailResult
+  );
+} else {
+  console.log(
+    "Email Skipped"
+  );
+}
+
+
 console.log(
   "AI Recommendation:"
 );
@@ -405,8 +711,11 @@ console.log(
   analytics
 );
 
+     }
+
       return {
         success: true,
       };
+
     }
   );
