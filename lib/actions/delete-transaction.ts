@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "../supabase-server";
+import { revalidatePath } from "next/cache";
 
 export async function deleteTransaction(
   transactionId: string
@@ -32,6 +33,7 @@ console.log(transactionError);
     .from("accounts")
     .select("*")
     .eq("id", transaction.account_id)
+    .eq("user_id", userId)
     .single();
 
 if (accountError || !account) {
@@ -68,6 +70,9 @@ const { error: deleteError } =
 if (deleteError) {
   throw new Error(deleteError.message);
 }
+
+revalidatePath("/dashboard");
+revalidatePath(`/account/${transaction.account_id}`);
 
 return {
   success: true,

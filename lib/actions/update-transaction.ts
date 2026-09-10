@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "../supabase-server";
+import { revalidatePath } from "next/cache";
 
 export async function updateTransaction(data: {
   transactionId: string;
@@ -36,6 +37,7 @@ const { data: account, error: accountError } =
     .from("accounts")
     .select("*")
     .eq("id", existingTransaction.account_id)
+    .eq("user_id", userId)
     .single();
 
 if (accountError || !account) {
@@ -86,6 +88,9 @@ if (updateError) {
   throw new Error(updateError.message);
 }
 
+
+revalidatePath("/dashboard");
+revalidatePath(`/account/${existingTransaction.account_id}`);
 
 return {
   success: true,
