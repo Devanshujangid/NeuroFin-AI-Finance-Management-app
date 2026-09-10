@@ -253,16 +253,16 @@ export default function TransactionTable({
 
   // for selection 
   const currentTransactionIds =
-  currentTransactions.map(
-    (transaction) => transaction.id
-  );
+    currentTransactions.map(
+      (transaction) => transaction.id
+    );
 
   // for computing all selected states
   const allCurrentPageSelected =
-  currentTransactionIds.length > 0 &&
-  currentTransactionIds.every((id) =>
-    selectedTransactions.includes(id)
-  );
+    currentTransactionIds.length > 0 &&
+    currentTransactionIds.every((id) =>
+      selectedTransactions.includes(id)
+    );
 
   // delete handler
   const handleDelete = async (
@@ -301,7 +301,7 @@ export default function TransactionTable({
         "Transactions deleted successfully"
       );
 
-      setSelectedTransactions([]);  
+      setSelectedTransactions([]);
       router.refresh();
 
     } catch {
@@ -409,7 +409,7 @@ export default function TransactionTable({
             focus:ring-2
             focus:ring-blue-500
             bg-white
-            min-w-[160px]
+            min-w-160px
           "
         >
 
@@ -449,7 +449,7 @@ export default function TransactionTable({
             focus:ring-2
             focus:ring-blue-500
             bg-white
-            min-w-[180px]
+            min-w-180px
           "
         >
 
@@ -467,14 +467,14 @@ export default function TransactionTable({
 
         </select>
 
-       {selectedTransactions.length > 0 && (
+        {selectedTransactions.length > 0 && (
 
-  <AlertDialog>
+          <AlertDialog>
 
-    <AlertDialogTrigger asChild>
+            <AlertDialogTrigger asChild>
 
-      <button
-        className="
+              <button
+                className="
           h-10
           px-4
           rounded-xl
@@ -485,46 +485,46 @@ export default function TransactionTable({
           hover:bg-red-700
           transition-colors
         "
-      >
-        Delete Selected
-        ({selectedTransactions.length})
-      </button>
+              >
+                Delete Selected
+                ({selectedTransactions.length})
+              </button>
 
-    </AlertDialogTrigger>
+            </AlertDialogTrigger>
 
-    <AlertDialogContent>
+            <AlertDialogContent>
 
-      <AlertDialogHeader>
+              <AlertDialogHeader>
 
-        <AlertDialogTitle>
-          Delete {selectedTransactions.length} transactions?
-        </AlertDialogTitle>
+                <AlertDialogTitle>
+                  Delete {selectedTransactions.length} transactions?
+                </AlertDialogTitle>
 
-        <AlertDialogDescription>
-          This action cannot be undone.
-        </AlertDialogDescription>
+                <AlertDialogDescription>
+                  This action cannot be undone.
+                </AlertDialogDescription>
 
-      </AlertDialogHeader>
+              </AlertDialogHeader>
 
-      <AlertDialogFooter>
+              <AlertDialogFooter>
 
-        <AlertDialogCancel>
-          Cancel
-        </AlertDialogCancel>
+                <AlertDialogCancel>
+                  Cancel
+                </AlertDialogCancel>
 
-        <AlertDialogAction
-          onClick={handleBulkDelete}
-        >
-          Delete
-        </AlertDialogAction>
+                <AlertDialogAction
+                  onClick={handleBulkDelete}
+                >
+                  Delete
+                </AlertDialogAction>
 
-      </AlertDialogFooter>
+              </AlertDialogFooter>
 
-    </AlertDialogContent>
+            </AlertDialogContent>
 
-  </AlertDialog>
+          </AlertDialog>
 
-)}
+        )}
 
       </div>
 
@@ -538,40 +538,40 @@ export default function TransactionTable({
 
             {/* SELECT */}
 
-            <TableHead className="w-[50px]">
+            <TableHead className="w-50px">
 
-  <input
-  type="checkbox"
-  checked={allCurrentPageSelected}
- onChange={(e) => {
+              <input
+                type="checkbox"
+                checked={allCurrentPageSelected}
+                onChange={(e) => {
 
-  if (e.target.checked) {
+                  if (e.target.checked) {
 
-    setSelectedTransactions((prev) => [
+                    setSelectedTransactions((prev) => [
 
-      ...new Set([
-        ...prev,
-        ...currentTransactionIds,
-      ]),
+                      ...new Set([
+                        ...prev,
+                        ...currentTransactionIds,
+                      ]),
 
-    ]);
+                    ]);
 
-  } else {
+                  } else {
 
-    setSelectedTransactions((prev) =>
-      prev.filter(
-        (id) =>
-          !currentTransactionIds.includes(id)
-      )
-    );
+                    setSelectedTransactions((prev) =>
+                      prev.filter(
+                        (id) =>
+                          !currentTransactionIds.includes(id)
+                      )
+                    );
 
-  }
+                  }
 
-}}
- className="h-4 w-4 accent-blue-600"
-/>
+                }}
+                className="h-4 w-4 accent-blue-600"
+              />
 
-</TableHead>
+            </TableHead>
 
             {/* DATE */}
 
@@ -765,7 +765,7 @@ export default function TransactionTable({
 
                 {/* DATE */}
 
-                <TableCell>
+                <TableCell suppressHydrationWarning>
                   {new Date(
                     transaction.date
                   ).toLocaleDateString()}
@@ -878,6 +878,7 @@ export default function TransactionTable({
                   <DropdownMenu>
 
                     <DropdownMenuTrigger
+                      suppressHydrationWarning
                       className="
                         h-8 w-8
                         rounded-full
@@ -894,7 +895,7 @@ export default function TransactionTable({
                       <DropdownMenuItem asChild>
 
                         <Link
-                          href={`/transaction/create?edit=${transaction.id}`}
+                          href={`/transaction/${transaction.id}/edit`}
                         >
                           Edit
                         </Link>
@@ -903,7 +904,7 @@ export default function TransactionTable({
 
                       <AlertDialog>
 
-                        <AlertDialogTrigger asChild>
+                        <AlertDialogTrigger asChild suppressHydrationWarning>
 
                           <DropdownMenuItem
                             onSelect={(e) =>
