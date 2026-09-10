@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import TransactionChart from "./TransactionChart";
+import ExpensePieChart from "./ExpensePieChart";
 
 type AnalyticsSectionProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,6 +72,62 @@ export default function AnalyticsSection({
 
     return true;
   });
+
+  // for finding Current Month's Expense 
+  const now = new Date();
+
+const currentMonthExpenses = transactions.filter((transaction) => {
+  const transactionDate = new Date(transaction.date);
+
+  return (
+    transaction.type === "EXPENSE" &&
+    transactionDate.getMonth() === now.getMonth() &&
+    transactionDate.getFullYear() === now.getFullYear()
+  );
+});
+
+// for grouping by category
+const expenseByCategory = new Map<string, number>();
+
+currentMonthExpenses.forEach((transaction) => {
+  const category =
+  String(transaction.category).trim().toLowerCase();
+  const amount = Number(transaction.amount);
+
+  expenseByCategory.set(
+    category,
+    (expenseByCategory.get(category) || 0) + amount
+  );
+});
+
+// calculate % share
+const totalCurrentMonthExpense =
+  currentMonthExpenses.reduce(
+    (total, transaction) =>
+      total + Number(transaction.amount),
+    0
+  );
+
+const expensePercentageByCategory =
+  Array.from(expenseByCategory.entries()).map(
+    ([category, amount]) => ({
+      category,
+      amount,
+      percentage:
+        totalCurrentMonthExpense > 0
+          ? (amount / totalCurrentMonthExpense) * 100
+          : 0,
+    })
+  );
+
+
+  // format pie chart
+  const pieChartData = expensePercentageByCategory.map(
+  ({ category, percentage }) => ({
+    name: category,
+    value: Number(percentage.toFixed(2)),
+  })
+);
 
   const filteredStats = filteredTransactions.reduce(
     (acc, transaction) => {
@@ -231,6 +288,10 @@ const chartData =
       <TransactionChart
         chartData={chartData}
       />
+
+      <ExpensePieChart
+  pieChartData={pieChartData}
+/>
 
     </div>
   );

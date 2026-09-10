@@ -21,7 +21,7 @@ export default function TransactionChart({
         Income vs Expense
       </h2>
 
-      <div className="h-[350px]">
+      <div className="h-87.5">
 
   <ResponsiveContainer
     width="100%"
