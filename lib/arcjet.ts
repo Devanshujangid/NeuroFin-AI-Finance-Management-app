@@ -1,4 +1,4 @@
-import arcjet, { tokenBucket } from "@arcjet/next";
+import arcjet, { shield, tokenBucket } from "@arcjet/next";
 
 export const aj = arcjet({
   key: process.env.ARCJET_KEY!,
@@ -13,6 +13,10 @@ export const aj = arcjet({
 // Tokens are replenished according to the configured 10-per-minute rate.
   characteristics: ["userId"],
   rules: [
+    shield({
+      mode: "LIVE",
+    }),
+
     tokenBucket({
       mode: "LIVE",
       refillRate: 10,

@@ -1,3 +1,6 @@
+import { auth } from "@clerk/nextjs/server";
+import { request } from "@arcjet/next";
+import { aj } from "@/lib/arcjet";
 import { sendEmail } from "@/lib/actions/send-email";
 import BudgetAlertEmail from "@/emails/BudgetAlertEmails";
 
@@ -5,6 +8,32 @@ export default function TestEmailPage() {
   async function handleSend() {
     "use server";
 
+    // ------------------------------------------
+    // 1. AUTHENTICATION CHECK
+    // ------------------------------------------
+    const { userId } = await auth();
+
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    // ------------------------------------------
+    // 2. ARCJET PROTECTION
+    // ------------------------------------------
+    const req = await request();
+
+    const decision = await aj.protect(req, {
+      userId,
+      requested: 1,
+    });
+
+    if (decision.isDenied()) {
+      throw new Error("Too many requests. Please try again later.");
+    }
+
+    // ------------------------------------------
+    // 3. SEND TEST EMAIL
+    // ------------------------------------------
     await sendEmail({
       to: "devanshujangid1234@gmail.com",
       subject: "NeuroFin Test Budget Alert",
@@ -38,4 +67,3 @@ export default function TestEmailPage() {
     </form>
   );
 }
-

@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import {
+  getCategoryColor,
+  normalizeCategory,
+} from "@/lib/category-colors";
 
 import {
   Table,
@@ -780,8 +784,17 @@ export default function TransactionTable({
                 {/* CATEGORY */}
 
                 <TableCell>
-                  {transaction.category}
-                </TableCell>
+  <span
+    style={{
+      color: getCategoryColor(
+        normalizeCategory(String(transaction.category))
+      ),
+    }}
+    className="font-medium"
+  >
+    {transaction.category}
+  </span>
+</TableCell>
 
                 {/* TYPE */}
 

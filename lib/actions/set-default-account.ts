@@ -3,12 +3,29 @@
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
+import { request } from "@arcjet/next";
+import { aj } from "@/lib/arcjet";
+
 export async function setDefaultAccount(accountId: string) {
   const { userId } = await auth();
 
   if (!userId) {
     throw new Error("Unauthorized");
   }
+
+  // ------------------------------------------
+// 2. ARCJET PROTECTION
+// ------------------------------------------
+const req = await request();
+
+const decision = await aj.protect(req, {
+  userId,
+  requested: 1,
+});
+
+if (decision.isDenied()) {
+  throw new Error("Too many requests. Please try again later.");
+}
 
   // Step 1 → reset all accounts to false
   const { error: resetError } = await supabaseAdmin

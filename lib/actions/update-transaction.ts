@@ -4,6 +4,9 @@ import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "../supabase-server";
 import { revalidatePath } from "next/cache";
 
+import { request } from "@arcjet/next";
+import { aj } from "@/lib/arcjet";
+
 export async function updateTransaction(data: {
   transactionId: string;
   amount: number;
@@ -19,6 +22,20 @@ export async function updateTransaction(data: {
   if (!userId) {
     throw new Error("Unauthorized");
   }
+
+  // ------------------------------------------
+// 2. ARCJET PROTECTION
+// ------------------------------------------
+const req = await request();
+
+const decision = await aj.protect(req, {
+  userId,
+  requested: 1,
+});
+
+if (decision.isDenied()) {
+  throw new Error("Too many requests. Please try again later.");
+}
 
   const { data: existingTransaction, error: transactionError } =
   await supabaseAdmin

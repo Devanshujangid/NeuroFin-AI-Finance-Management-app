@@ -34,11 +34,7 @@ if (!data.react) {
   );
 }
 
-    console.log(
-  "sendEmail action called"
-);
 
-console.log(data);
 
 const result =
   await resend.emails.send({
@@ -62,7 +58,7 @@ return {
   error:
     error instanceof Error
       ? error.message
-      : "Failed to send email",
+      : "Failed to send email"
 };
   }
 }

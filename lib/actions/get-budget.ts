@@ -2,14 +2,30 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { request } from "@arcjet/next";
+import { aj } from "@/lib/arcjet";
 
 export async function getBudget(accountId: string) {
   try {
     const { userId } = await auth();
 
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
+if (!userId) {
+  throw new Error("Unauthorized");
+}
+
+// ------------------------------------------
+// 2. ARCJET PROTECTION
+// ------------------------------------------
+const req = await request();
+
+const decision = await aj.protect(req, {
+  userId,
+  requested: 1,
+});
+
+if (decision.isDenied()) {
+  throw new Error("Too many requests. Please try again later.");
+}
 
     if (!accountId) {
       throw new Error("Account ID is required");

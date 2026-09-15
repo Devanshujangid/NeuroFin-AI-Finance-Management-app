@@ -8,6 +8,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
+// for protection 
+import { request } from "@arcjet/next";
+import { aj } from "@/lib/arcjet";
+
 // Define the expected structure of the incoming data from the frontend
 type CreateAccountInput = {
   name: string;
@@ -26,6 +30,20 @@ export async function createAccount(data: CreateAccountInput) {
     const { userId } = await auth();
     if (!userId) {
       throw new Error("Unauthorized");
+    }
+
+        // ------------------------------------------
+    // 2. ARCJET PROTECTION
+    // ------------------------------------------
+    const req = await request();
+
+    const decision = await aj.protect(req, {
+      userId,
+      requested: 1,
+    });
+
+    if (decision.isDenied()) {
+      throw new Error("Too many requests. Please try again later.");
     }
 
     // Initialize our Supabase instance to interact with the database

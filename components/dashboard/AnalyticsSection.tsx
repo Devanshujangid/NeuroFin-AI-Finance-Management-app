@@ -2,6 +2,7 @@
 import { useState } from "react";
 import TransactionChart from "./TransactionChart";
 import ExpensePieChart from "./ExpensePieChart";
+import { normalizeCategory } from "@/lib/category-colors";
 
 type AnalyticsSectionProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -29,11 +30,50 @@ export default function AnalyticsSection({
   const [timeRange, setTimeRange] =
   useState("1M");
 
+  // for month selection:
+  const [selectedMonth, setSelectedMonth] =
+  useState(() => {
+    const date = new Date();
+
+    return `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}`;
+  });
+
+  // Generate available months
+const availableMonths = Array.from(
+  new Set(
+    transactions.map((transaction) => {
+      const date = new Date(transaction.date);
+
+      return `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
+    })
+  )
+).sort((a, b) => b.localeCompare(a));
+
+
+
   const filteredTransactions =
   transactions.filter((transaction) => {
 
     const transactionDate =
       new Date(transaction.date);
+
+// generate available months:
+//   const availableMonths = Array.from(
+//   new Set(
+//     transactions.map((transaction) => {
+//       const date = new Date(transaction.date);
+
+//       return `${date.getFullYear()}-${String(
+//         date.getMonth() + 1
+//       ).padStart(2, "0")}`;
+//     })
+//   )
+// ).sort((a, b) => b.localeCompare(a));
+
 
     const now = new Date();
 
@@ -73,25 +113,30 @@ export default function AnalyticsSection({
     return true;
   });
 
-  // for finding Current Month's Expense 
-  const now = new Date();
+// for finding Selected Month's Expense
+const [selectedYear, selectedMonthNumber] =
+  selectedMonth.split("-");
 
-const currentMonthExpenses = transactions.filter((transaction) => {
-  const transactionDate = new Date(transaction.date);
+const selectedMonthExpenses = transactions.filter(
+  (transaction) => {
+    const transactionDate = new Date(transaction.date);
 
-  return (
-    transaction.type === "EXPENSE" &&
-    transactionDate.getMonth() === now.getMonth() &&
-    transactionDate.getFullYear() === now.getFullYear()
-  );
-});
+    return (
+      transaction.type === "EXPENSE" &&
+      transactionDate.getFullYear() ===
+        Number(selectedYear) &&
+      transactionDate.getMonth() ===
+        Number(selectedMonthNumber) - 1
+    );
+  }
+);
 
 // for grouping by category
 const expenseByCategory = new Map<string, number>();
 
-currentMonthExpenses.forEach((transaction) => {
+selectedMonthExpenses.forEach((transaction) => {
   const category =
-  String(transaction.category).trim().toLowerCase();
+    normalizeCategory(String(transaction.category));
   const amount = Number(transaction.amount);
 
   expenseByCategory.set(
@@ -101,8 +146,8 @@ currentMonthExpenses.forEach((transaction) => {
 });
 
 // calculate % share
-const totalCurrentMonthExpense =
-  currentMonthExpenses.reduce(
+const totalSelectedMonthExpense =
+  selectedMonthExpenses.reduce(
     (total, transaction) =>
       total + Number(transaction.amount),
     0
@@ -114,9 +159,9 @@ const expensePercentageByCategory =
       category,
       amount,
       percentage:
-        totalCurrentMonthExpense > 0
-          ? (amount / totalCurrentMonthExpense) * 100
-          : 0,
+  totalSelectedMonthExpense > 0
+    ? (amount / totalSelectedMonthExpense) * 100
+    : 0,
     })
   );
 
@@ -290,8 +335,11 @@ const chartData =
       />
 
       <ExpensePieChart
-  pieChartData={pieChartData}
-/>
+        pieChartData={pieChartData}
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+        availableMonths={availableMonths}
+      />
 
     </div>
   );
